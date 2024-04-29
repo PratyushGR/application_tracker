@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ChartJS Stacked Bar Chart Example</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.1/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h3 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #stackedChartID {
+            margin: 0 auto;
+            display: block;
+            max-width: 600px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Application Status</h1>
+
+    <div>
+        <canvas id="stackedChartID"></canvas>
+    </div>
+
+    <script>
+        var status_data = {{ status_data|tojson|safe }};
+        var labels = Object.keys(status_data);
+        var datasets = Object.keys(status_data[labels[0]]).map(function(status) {
+            var backgroundColor;
+            switch (status) {
+                case 'In Progress':
+                    backgroundColor = "blue";
+                    break;
+                case 'Accepted':
+                    backgroundColor = "green";
+                    break;
+                case 'Rejected':
+                    backgroundColor = "red";
+                    break;
+                default:
+                    backgroundColor = "red"; // default color if not matched
+            }
+            return {
+                label: status,
+                backgroundColor: backgroundColor,
+                data: labels.map(function(date) {
+                    return status_data[date][status];
+                })
+            };
+        });
+
+        // Get the drawing context on the canvas 
+        var myContext = document.getElementById("stackedChartID").getContext('2d');
+        var myChart = new Chart(myContext, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Application Status Over Time',
+                        font: {
+                            size: 18
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Applications'
+                        },
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Application Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h2 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+        select, button {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            width: 100%;
+            font-size: 16px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+        td a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        td a:hover {
+            text-decoration: underline;
+        }
+        .companyRow {
+            display: none;
+        }
+        .companyRow.show {
+            display: table-row;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/">Home</a>
+    </header>
+    <h2>Update Application Status</h2>
+    <form id="updateStatusForm" action="{{ url_for('update_status') }}" method="post">
+        <label for="company_select">Select Company:</label><br>
+        <select id="company_select" name="company_id">
+            <option value="">All Companies</option>
+            {% for company, applications in applications.items() %}
+                <option value="{{ company }}">{{ company }}</option>
+            {% endfor %}
+        </select><br><br>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Applied On</th>
+                    <th>Company</th>
+                    <th>Job Title</th>
+                    <th>Status</th>
+                    <th>Update Status</th>
+                </tr>
+            </thead>
+            <tbody id="applicationTableBody">
+                {% for company, apps in applications.items() %}
+                    {% for app in apps %}
+                        <tr class="companyRow" data-company="{{ company }}">
+                            <td>{{ app[2] }}</td>
+                            <td>{{ company }}</td>
+                            <td><a href="{{ app[4] }}">{{ app[1] }}</a></td>
+                            <td>{{ app[3] }}</td>
+                            <td>
+                                <form action="{{ url_for('update_status') }}" method="post">
+                                    <input type="hidden" name="application_id" value="{{ app[0] }}">
+                                    <div>
+                                        <button type="submit">Update Status</button>
+                                        <div>
+                                            <select name="status">
+                                                <option value="Accepted">Accepted</option>
+                                                <option value="Declined">Declined</option>
+                                                <option value="In Progress">In Progress</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+
+    <script>
+        document.getElementById('company_select').addEventListener('change', function() {
+            var selectedCompany = this.value;
+            var rows = document.querySelectorAll('.companyRow');
+            rows.forEach(function(row) {
+                if (selectedCompany === '' || row.dataset.company === selectedCompany) {
+                    row.classList.add('show');
+                } else {
+                    row.classList.remove('show');
+                }
+            });
+        });
+            // Function to show all rows when no company is selected
+        function showAllRows() {
+            var rows = document.querySelectorAll('.companyRow');
+            rows.forEach(function(row) {
+                row.classList.add('show');
+            });
+        }
+
+        // Show all rows initially
+        showAllRows();
+    </script>
+</body>
+</html>

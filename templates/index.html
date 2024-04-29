@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        li a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        li a:hover {
+            background-color: #0056b3;
+        }
+
+        #stackedChartID {
+            margin: 0 auto;
+            display: block;
+            max-width: 600px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Job Application Tracker</h1>
+        <ul>
+            <li><a href="{{ url_for('add_application') }}">Add Job Application</a></li>
+            <li><a href="{{ url_for('update_status') }}">Update Application Status</a></li>
+        </ul>
+
+        <h2>Application Status Over Time</h2>
+        <canvas id="stackedChartID"></canvas>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.1/dist/chart.umd.min.js"></script>
+        <script>
+            var status_data = {{ status_data|tojson|safe }};
+            var labels = Object.keys(status_data);
+            var datasets = Object.keys(status_data[labels[0]]).map(function(status) {
+                var backgroundColor;
+                switch (status) {
+                    case 'In Progress':
+                        backgroundColor = "blue";
+                        break;
+                    case 'Accepted':
+                        backgroundColor = "green";
+                        break;
+                    case 'Rejected':
+                        backgroundColor = "red";
+                        break;
+                    default:
+                        backgroundColor = "red"; // default color if not matched
+                }
+                return {
+                    label: status,
+                    backgroundColor: backgroundColor,
+                    data: labels.map(function(date) {
+                        return status_data[date][status];
+                    })
+                };
+            });
+
+            var myContext = document.getElementById("stackedChartID").getContext('2d');
+            var myChart = new Chart(myContext, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Application Status Over Time',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Applications'
+                            },
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+    </div>
+</body>
+
+</html>
